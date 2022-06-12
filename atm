@@ -1,0 +1,596 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <process.h>
+typedef struct ATM
+{
+  int   card;//账户卡号
+  char  idname[11];//账户名称
+  char  id[19];//身份证
+  char  mobile[12];//手机号码
+  char  mm[7];//密码
+  char  lock; //卡状态 
+  double money;// 余额
+}ATMsystem;
+ATMsystem atm[42],bac={0,'\0','\0','\0','\0','0',0.0}; 
+int N=0,kh;//保存储户个数 是全局变量 <=42 可以创建42个储户
+FILE *file;//储户文件指针file全局变量
+int  init();//初始化
+void welcome();//欢迎界面
+void menu_main();//主控界面
+void qkAccount(int i); 
+void ckAccount(int i); 
+void zzAccount(int j);
+void addAccount();//新开户
+void menu_addAccount(); 
+void menu_addAccountDetail(); 
+void passwordAccount(int i);//修改信息
+void queryAccount(int i);//查询余额 
+void quit();//退出
+int main()
+{	
+   
+	char ch,mm[7];
+	int zh,t=3,j,i;
+	if(init() == 0)
+	{
+		printf("初始化系统失败！");
+		system("pause");//系统暂停
+		exit(0);
+	}
+    welcome();//欢迎界面
+    do
+	{
+	    printf("账号："); 
+		scanf("%d",&zh);
+		getchar();
+		for(i=0;i<N;i++)
+			if(atm[i].card==zh)
+			{
+				j=i;
+				break;
+			}
+		if(i==N)
+		{
+			puts("账号错误");
+			continue;
+		}
+		if(j==i)
+			break;	
+	}while(1);
+	if(atm[i].lock=='1')
+	{
+		printf("该账户已锁定，请联系柜台\n");
+		exit(0);
+	}
+	do
+	{
+		printf("密码：");
+		gets(mm);			
+		if(strcmp(atm[i].mm,mm)==0)
+		{	
+			
+			printf("		%s欢迎您使用第三组银行储蓄系统\n",&atm[i].idname);
+			while(1)
+			{
+				system("color 1f");
+			    menu_main();
+				do
+				{
+					ch = getchar();
+				}while(ch < '1' || ch > '7');
+				switch(ch)
+				{
+					case '1':addAccount(); break;//新用户开户	
+					case '2':qkAccount(i);break; //取款界面 
+					case '3':ckAccount(i);break; //存款界面 
+					case '4':zzAccount(i);break; //转账界面  
+					case '5':queryAccount(i);break;//余额查询
+					case '6':passwordAccount(i);break;//密码修改
+					case '7':quit();//退出系统		
+				}
+			}
+		}
+		if(--t!=0) 
+			printf("您还有%d次输入密码的机会\n",t);
+		else
+		{
+			printf("密码错误三次，账户已锁定，请联系柜台\n");
+			atm[i].lock='1';
+			quit();
+		}	
+	}while(t>0);
+}
+void welcome()
+{
+	printf("*************************************************************************\n");
+	printf("*			欢迎使用3组银行储户开户系统			*\n");
+	printf("*************************************************************************\n");
+	puts("=========================================================================");
+	puts("				登录界面");
+	puts("			账号：");
+	puts("			密码：");
+	puts("		（提示：请输入你的卡号和密码，保证银行卡已经插入）");
+	puts("=========================================================================");
+}
+void menu_main()
+{
+	puts("**********************************************************");
+	puts("			主菜单"); 
+	puts("请选择需要的服务：");
+	puts("1.储户新开户			");
+	puts("2.取款					3.存款");
+	puts("4.转账					5.余额查询"); 
+	puts("6.储户密码修改				7.退出");
+	puts("**********************************************************");
+}
+void menu_qkAccount()//取款界面
+{
+	puts("===========================================================");
+	puts("请选择你要取款的金额：（输入对应的序号）");
+	puts("(1) 100			(2) 200");
+	puts("(3) 500			(4) 1000");
+	puts("(5) 自定义金额			(0) 退出");
+	puts("===========================================================");
+}
+void qkAccount(int i)
+{
+	int t;
+	while(1)
+	{
+		do
+		{
+			menu_qkAccount();
+			scanf("%d",&t);
+		}while(t<0||t>5);
+		if(t==0)
+			break;
+		switch(t)
+		{
+			case 1:
+				if(atm[i].money>=100)
+					{atm[i].money-=100;puts("取款成功");} 
+				else
+					printf("您的余额不足\n");
+				break;
+			case 2:
+				if(atm[i].money>=200)
+					{atm[i].money-=200;puts("取款成功");}
+				else
+					printf("您的余额不足\n");
+				break;	
+			case 3:
+				if(atm[i].money>=500)
+					{atm[i].money-=500;puts("取款成功");}
+				else
+					printf("您的余额不足\n");
+				break;
+			case 4:
+				if(atm[i].money>=1000)
+					{atm[i].money-=1000;puts("取款成功");}
+				else
+					printf("您的余额不足\n");
+				break;
+			case 5:
+			float money;
+			while(1)
+			{
+				puts("请输入取款金额"); 
+				scanf("%f",&money);
+				if((int)money==money)
+					if((int)money%100==0) 
+						if(money<=50000)
+							break;
+						else
+							puts("输入的取款金额不超过2万元");
+					else
+						puts("输入的取款金额必须是100的整数倍");
+				else
+					puts("输入的取款金额必须是整数"); 
+			}
+			atm[i].money-=money;
+			puts("取款成功");
+		}
+	} 	
+}
+void menu_ckAccount()//存款界面
+{
+	puts("===========================================================");
+	puts("请选择你要存款的金额：（输入对应的序号）");
+	puts("(1) 100			(2) 200");
+	puts("(3) 500			(4) 1000");
+	puts("(5) 自定义金额			(0) 退出");
+	puts("===========================================================");
+}
+void ckAccount(int i)
+{
+	int t;
+	while(1)
+	{
+		do
+		{
+			menu_ckAccount();
+			scanf("%d",&t);
+		}while(t<0||t>5);
+		if(t==0)
+			break;
+		switch(t)
+		{
+			case 1:
+				atm[i].money+=100;puts("存款成功");
+				break;
+			case 2:
+				atm[i].money+=200;puts("存款成功");
+				break;	
+			case 3:
+				atm[i].money+=500;puts("存款成功");
+				break;
+			case 4:
+				atm[i].money+=1000;puts("存款成功");
+				break;
+			case 5:
+			float money;
+			while(1)
+			{
+				puts("请输入存款金额"); 
+				scanf("%f",&money);
+				if((int)money==money)
+					if((int)money%100==0) 
+						if(money<=50000)
+							break;
+						else
+							puts("输入的存款金额不超过2万元");
+					else
+						puts("输入的存款金额必须是100的整数倍");
+				else
+					puts("输入的存款金额必须是整数"); 
+			}
+			atm[i].money+=money;
+			puts("存款成功");
+		}
+	} 	
+}
+void menu_zzAccount0()//转账界面 
+{
+	puts("===========================================================");
+	puts("请选择需要的服务：");
+	puts("1.转账\n0.退出"); 
+	puts("===========================================================");
+} 
+void menu_zzAccount1()//转账界面 
+{
+	puts("===========================================================");
+	puts("请输入你转到的账户[卡号](注意：输入0退出)"); 
+	puts("===========================================================");
+}
+void menu_zzAccount2()//转账界面 
+{
+	puts("===========================================================");
+	puts("请选择你要转账的金额：（输入对应的序号）");
+	puts("(1) 100			(2) 200");
+	puts("(3) 500			(4) 1000");
+	puts("(5) 自定义金额			(0) 退出");
+	puts("===========================================================");
+}
+void  zzAccount(int j)
+{
+	int card,i,t;
+	do
+	{
+		menu_zzAccount0();
+		scanf("%d",&t);
+	}while(t!=0&&t!=1); 
+	while(1)
+	{
+		menu_zzAccount1();
+		scanf("%d",&card);
+		if(card==0)
+			break;
+		if(card/100<=0||card/100>=10)
+			puts("不存在此账户");
+		else
+		{
+			for(i=0;i<N;i++)
+				if(atm[i].card==card&&atm[j].card!=atm[i].card)
+				{
+					if(atm[i].lock!='0')
+					{
+						puts("对方账户已被锁，禁止转账");
+						break;
+					}
+					do
+					{
+					menu_zzAccount2();
+					scanf("%d",&t);
+					}while(t<0||t>5);
+					switch(t)
+					{
+						case 1:
+							if(atm[j].money>=100)
+							{
+								atm[j].money-=100;
+								atm[i].money+=100;
+								puts("转账成功");
+							} 
+							else
+								printf("您的余额不足\n");
+							break;
+						case 2:
+							if(atm[j].money>=200)
+							{
+								atm[j].money-=200;
+								atm[i].money+=200;
+								puts("转账成功");
+							}
+							else
+								printf("您的余额不足\n");
+							break;	
+						case 3:
+							if(atm[j].money>=500)
+							{
+								atm[j].money-=500;
+								atm[i].money+=500;
+								puts("转账成功");
+							}
+							else
+								printf("您的余额不足\n");
+							break;
+						case 4:
+							if(atm[j].money>=500)
+							{
+								atm[j].money-=500;
+								atm[i].money+=500;
+								puts("转账成功");
+							}
+							else
+								printf("您的余额不足\n");
+							break;
+						case 5:
+							float money;
+							while(1)
+							{
+								puts("请输入存取款金额"); 
+								scanf("%f",&money);
+								if((int)money==money)
+									if((int)money%100==0) 
+										if(money<=50000)
+											break;
+										else
+											puts("输入的转帐金额不超过2万元");
+									else
+										puts("输入的转帐金额必须是整数倍");
+								else
+									puts("输入的转帐金额必须是整数"); 
+							}
+							atm[j].money-=money;
+							atm[i].money+=money;
+							puts("转账成功");
+						}
+					break;
+				}
+			if(i==N)
+				puts("账户有误");
+		}
+	}
+}
+int init()
+{
+	int i = 0,j=0;
+	if((file = fopen("D:\\c代码\\临时\\text.txt","r+")) == NULL)
+		return 0;
+	while(1)
+	{
+		fscanf(file, "%d%s%s%s%s %c%lf\n", 
+		&atm[i].card, 
+		atm[i].idname, 
+		atm[i].id, 
+		atm[i].mobile, 
+		atm[i].mm, 
+		&atm[i].lock, 
+		&atm[i].money);
+		i++;
+		if(feof(file)) break;
+    }
+/*    for(int j=0;j<i;j++)
+    printf("卡号%d 姓名%s 身份证%s 电话%s 密码%s 状态%c 金额%lf\n", 
+		atm[j].card, 
+		atm[j].idname, 
+		atm[j].id, 
+		atm[j].mobile, 
+		atm[j].mm, 
+		atm[j].lock, 
+		atm[j].money); */
+	N=i;
+}
+
+void quit()
+{
+	int i;
+	rewind(file);//将文件指针移动到开始位置
+	//将N个储户信息全部保存到文件
+	for(i = 0; i < N; i++)
+	{
+		fprintf(file,"%d %s %s %s %s %c %.2lf\n",
+		               atm[i].card, 
+					   atm[i].idname, 
+					   atm[i].id, 
+					   atm[i].mobile,
+					   atm[i].mm, 
+					   atm[i].lock, 
+					   atm[i].money);
+	}
+    //fclose(file)函数 完成将文件缓存区的数据写入文件 ，释放文件的内存缓存资源和文件指针设为空指针。
+	fclose(file);
+	puts("信息已保存，即将退出系统。\n");
+	system("pause");
+	exit(0);
+}
+void menu_addAccount(){
+ 	puts("\n请选择需要的服务：\n");
+	puts("1.储户新开户\n");
+	puts("0.退出\n");
+}
+void menu_addAccountDetail(){
+	puts("\n请输入新的储户开户信息：\n");
+	puts("姓名 身份证号码  手机号码 初始余额\n");
+	
+}
+void addAccount()
+{ 
+	char ch1;
+	char digitFlag='1';//身份证数字标记   ‘0’不是数字；‘1’全部是数字
+	int i=0;
+	while(1)
+	{
+		menu_addAccount();
+		//控制输入的内容只能是'0'和'1' 
+		do{
+			ch1=getchar();
+		}while(ch1<'0'||ch1>'1');
+		if(ch1=='0')
+			break;
+	//执行储户新开户
+		while(1)
+		{
+			menu_addAccountDetail();
+			//输入储户的信息:姓名 身份证号码  手机号码 初始余额
+			scanf("%s%s%s%lf",&bac.idname,&bac.id,&bac.mobile,&bac.money);
+			printf("%s,%s,%s,%lf",bac.idname,bac.id,bac.mobile,bac.money);
+			//    验证输入的姓名信息是否合法
+			if(strlen(bac.idname)<1||strlen(bac.idname)>10)
+			{
+				printf("账户名称长度需在1到10之间，请重新输入！");
+				continue;
+			} 
+			// 身份证号码必须是17位数字，第18位可以是数字或字符
+			if(strlen(bac.id)<1||strlen(bac.id)>18)
+			{
+				printf("身份证号码长度只能18位，请重新输入！");
+				continue;
+			}
+			//身份证号码前17位必须是数字
+			//通过数字标记，判断身份证号码是否全部是数字 
+			//                     ‘0’不是数字；‘1’全部是数字
+            digitFlag='1';
+			for(i=0;i<18;i++)
+			{
+				//isdigit(ch)
+				if(bac.id[i]<'0'||bac.id[i]>'9')
+				{
+					if(i!=17)
+					{
+						digitFlag='0';
+						break;
+					}
+					else if(bac.id[i]!='X'&&bac.id[i]!='x')
+							digitFlag='0';
+				}
+			}
+			//如果 身份证号码前17位不是数字，18位不是数字并且不是x或X,返回去重新输入；
+			if(digitFlag=='0')
+			{
+				printf("身份证号码输入有误，请重新输入！");
+				continue;//返回重新输入
+			}
+			//如果 手机号码不是11位，返回去重新输入
+			//			   是11位，继续执行；
+			if(strlen(bac.mobile)!=11)
+			{
+				printf("手机号码长度只能11位，请重新输入！");
+				continue;
+			}
+			//默认手机号码全是数字
+			digitFlag='1';
+			//判断手机号是否全部是数字
+			for(i=0;i<11;i++)
+			{
+				if(bac.mobile[i]<'0'||bac.mobile[i]>'9')
+				{
+					digitFlag='0';
+					break; 
+				}	
+			}
+			//如果 手机号码 不是数字，返回去重新输入；
+			//		          全部是数字，继续执行；
+			if(digitFlag=='0')
+			{
+				printf("手机号码必须是数字，请重新输入！");
+				continue;
+			}
+			//判断初始余额是否为50元，不是，返回去重新输入；
+			//                        是，继续执行；
+			if(bac.money!=50)
+			{
+				printf("初始余额只能为50元，请重新输入！");
+				continue;
+			}
+            bac.card =301+N;
+			//将输入的身份证后六位作为初始密码保存
+            bac.mm[0]=bac.id[12];
+            bac.mm[1]=bac.id[13];
+            bac.mm[2]=bac.id[14];
+            bac.mm[3]=bac.id[15];
+            bac.mm[4]=bac.id[16];
+            bac.mm[5]=bac.id[17];
+			//将当前输入的验证合法的储户信息保存到新开户的储户信息
+			bac.lock='0';
+            atm[N] = bac ;
+			//N加一作为下一位储户的序号
+			N++;
+    		break;
+		}
+	}     
+}
+void menu_updateAccount()
+{
+	puts("\n请选择需要的服务：\n");
+	puts("1.储户密码修改\n");
+	puts("0.退出\n");
+}
+void queryAccount(int i) 
+{
+	puts("=========================================");
+	printf("		可用余额：%.2lf\n",atm[i].money);
+	puts("=========================================");		
+}
+//储户密码修改
+void passwordAccount(int i)
+{
+	char ch1;
+	int t=3;
+	while(1)
+	{
+		menu_updateAccount();//1 修改 0 退出
+		do{
+			ch1=getchar();
+		}while(ch1<'0'||ch1>'1');
+		if(ch1=='0')
+			break;
+		while(1)//执行储户密码修改
+		{	
+			puts("请输入您的的旧密码 [0:返回]\n");
+			scanf("%s",bac.mm);
+			if(strcmp(bac.mm,"0")==0) break;
+			if(strcmp(bac.mm,atm[i].mm)!=0)
+			{
+				if(--t!=0) 
+					printf("您还有%d次输入密码的机会\n",t);
+				else
+				{
+					printf("密码错误三次，账户已锁定，请联系柜台\n");
+					atm[i].lock='1';
+					quit();
+				}
+				continue;
+			}
+			puts("请输入您的的新密码 [0:返回]\n");
+			scanf("%s",&bac.mm);
+			if(strcmp(bac.mm,"0")==0) break;
+			if(strlen(bac.mm)==6)
+			{
+				strcpy(atm[i].mm,bac.mm);
+				break;
+			}
+		}
+	}
+}
