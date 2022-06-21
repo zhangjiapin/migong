@@ -391,7 +391,7 @@ int init()
 		i++;
 		if(feof(file)) break;
     }
-/*    for(int j=0;j<i;j++)
+    for(int j=0;j<i;j++)
     printf("卡号%d 姓名%s 身份证%s 电话%s 密码%s 状态%c 金额%lf\n", 
 		atm[j].card, 
 		atm[j].idname, 
@@ -399,8 +399,8 @@ int init()
 		atm[j].mobile, 
 		atm[j].mm, 
 		atm[j].lock, 
-		atm[j].money); */
-	N=i;
+		atm[j].money); 
+	 N=i;
 }
 
 void quit()
@@ -446,7 +446,7 @@ void addAccount()
 		//控制输入的内容只能是'0'和'1' 
 		do{
 			ch1=getchar();
-		}while(ch1<'0'||ch1>'1');
+		  }while(ch1<'0'||ch1>'1');
 		if(ch1=='0')
 			break;
 	//执行储户新开户
@@ -471,7 +471,7 @@ void addAccount()
 			//身份证号码前17位必须是数字
 			//通过数字标记，判断身份证号码是否全部是数字 
 			//                     ‘0’不是数字；‘1’全部是数字
-            digitFlag='1';
+               digitFlag='1';
 			for(i=0;i<18;i++)
 			{
 				//isdigit(ch)
